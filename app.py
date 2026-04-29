@@ -170,7 +170,7 @@ def keep_alive():
     """Thread qui ping l'app elle-même toutes les 10 minutes."""
     # On attend 30s au démarrage que le serveur soit prêt
     time.sleep(30)
-    url = os.environ.get("APP_URL", "")  # ex: https://iacam.onrender.com
+    url = os.environ.get("https://boukala-bonoko-franck-gabriel-24g2765.onrender.com/", "")
     if not url:
         return  # Ne ping rien en local
     while True:
