@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IA — Universités Camerounaises</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Flask sert les fichiers statiques via /static/ -->
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <body>
+    <canvas id="bg-canvas"></canvas>
+
+    <header>
+      <div class="header-container">
+        <div class="logo">
+          <div class="logo-icon"><span></span><span></span><span></span></div>
+          <span class="logo-text">IA<em>Cam</em></span>
+        </div>
+        <button class="hamburger" id="hamburger" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+        <nav class="menu" id="menu">
+          <ul>
+            <li><a href="#" class="active">Accueil</a></li>
+            <li><a href="#" id="nav-data">Données</a></li>
+            <li><a href="#" id="nav-result">Résultats</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero" id="home-section">
+        <div class="hero-tag">Étude • Cameroun • 2025</div>
+        <h1 class="hero-title">
+          <span class="line">Impact de</span>
+          <span class="line accent">l'Intelligence</span>
+          <span class="line">Artificielle</span>
+        </h1>
+        <p class="hero-sub">
+          dans les <strong>Universités Camerounaises</strong>
+        </p>
+        <p class="hero-desc">
+          Participez à la collecte de données sur l'utilisation des outils d'IA.
+          Chaque contribution améliore la précision de nos analyses.
+        </p>
+        <div class="stats-row">
+          <div class="stat-item">
+            <span class="stat-num" id="stat-count">0</span>
+            <span class="stat-label">Réponses</span>
+          </div>
+          <div class="stat-sep"></div>
+          <div class="stat-item">
+            <span class="stat-num">7</span>
+            <span class="stat-label">Universités</span>
+          </div>
+          <div class="stat-sep"></div>
+          <div class="stat-item">
+            <span class="stat-num">8</span>
+            <span class="stat-label">Filières</span>
+          </div>
+        </div>
+        <div class="btn-group">
+          <button class="btn-primary" id="btn-launch">
+            <span class="btn-icon">▶</span> Lancer l'Analyse
+          </button>
+          <button class="btn-secondary" id="btn-consult">
+            <span class="btn-icon">◈</span> Consulter les Résultats
+          </button>
+        </div>
+      </section>
+
+      <section class="results-section hidden" id="results-section">
+        <div class="section-header">
+          <h2>Tableau de Bord</h2>
+          <p>
+            Analyse des <span id="total-responses">0</span> réponses collectées
+          </p>
+          <button class="btn-back" id="btn-back">← Retour</button>
+        </div>
+        <div class="no-data hidden" id="no-data">
+          <div class="no-data-icon">◎</div>
+          <p>Aucune donnée disponible.<br />Soyez le premier à participer !</p>
+          <button class="btn-primary" id="btn-launch-2">
+            Participer maintenant
+          </button>
+        </div>
+        <div class="dashboard" id="dashboard">
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-label">Usage IA moyen</div>
+              <div class="kpi-value" id="kpi-usage">—</div>
+              <div class="kpi-sub">/ 5</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Autonomie moyenne</div>
+              <div class="kpi-value" id="kpi-autonomy">—</div>
+              <div class="kpi-sub">/ 5</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Outil dominant</div>
+              <div class="kpi-value kpi-text" id="kpi-tool">—</div>
+              <div class="kpi-sub">Top choix</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">IA-Dépendants</div>
+              <div class="kpi-value" id="kpi-dependent">—</div>
+              <div class="kpi-sub">% des répondants</div>
+            </div>
+          </div>
+          <div class="insight-card" id="insight-text"></div>
+          <div class="charts-grid">
+            <div class="chart-card">
+              <h3 class="chart-title">Fréquence d'usage par Université</h3>
+              <canvas id="chart-universite"></canvas>
+            </div>
+            <div class="chart-card">
+              <h3 class="chart-title">Outils IA les plus utilisés</h3>
+              <canvas id="chart-outils"></canvas>
+            </div>
+            <div class="chart-card">
+              <h3 class="chart-title">Score académique vs Usage IA</h3>
+              <canvas id="chart-scatter"></canvas>
+            </div>
+            <div class="chart-card">
+              <h3 class="chart-title">Profils des étudiants</h3>
+              <canvas id="chart-profils"></canvas>
+            </div>
+            <div class="chart-card wide">
+              <h3 class="chart-title">Impact perçu sur les notes par niveau</h3>
+              <canvas id="chart-impact"></canvas>
+            </div>
+          </div>
+          <div class="export-row">
+            <button class="btn-export" id="btn-export">
+              ⬇ Exporter les données (JSON)
+            </button>
+            <!-- <button class="btn-export danger" id="btn-clear">
+              ✕ Effacer toutes les données
+            </button> -->
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- MODAL FORMULAIRE -->
+    <div class="modal-overlay" id="modal-overlay">
+      <div class="modal" id="modal">
+        <button class="modal-close" id="modal-close">✕</button>
+        <div class="modal-header">
+          <div class="modal-step-indicator">
+            <span class="step active" data-step="1">01</span>
+            <span class="step-line"></span>
+            <span class="step" data-step="2">02</span>
+            <span class="step-line"></span>
+            <span class="step" data-step="3">03</span>
+          </div>
+          <h2 class="modal-title">Questionnaire</h2>
+          <p class="modal-subtitle" id="step-subtitle">
+            Informations générales
+          </p>
+        </div>
+
+        <form id="survey-form" novalidate>
+          <!-- ÉTAPE 1 -->
+          <div class="form-step active" id="step-1">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="pseudo"
+                  >Pseudo <span class="optional">(optionnel)</span></label
+                >
+                <input
+                  type="text"
+                  id="pseudo"
+                  name="pseudo"
+                  placeholder="Votre nom ou pseudo"
+                />
+              </div>
+              <div class="form-group">
+                <label for="age">Âge <span class="required">*</span></label>
+                <input
+                  type="number"
+                  id="age"
+                  name="age"
+                  placeholder="ex: 21"
+                  min="16"
+                  max="40"
+                  required
+                />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="universite"
+                >Université <span class="required">*</span></label
+              >
+              <select id="universite" name="universite" required>
+                <option value="">Sélectionnez votre institution</option>
+                <option>Université de Yaoundé 1</option>
+                <option>Université de Douala</option>
+                <option>Ecole Nationale Supérieure Polytechnique</option>
+                <option>Université de Dschang</option>
+                <option>ESSTIC</option>
+                <option>Université de Bamenda</option>
+                <option>IUT de Bandjoun</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="filiere"
+                  >Filière <span class="required">*</span></label
+                >
+                <select id="filiere" name="filiere" required>
+                  <option value="">Sélectionnez</option>
+                  <option>Informatique</option>
+                  <option>ICT</option>
+                  <option>Médecine</option>
+                  <option>Droit</option>
+                  <option>Mathématiques</option>
+                  <option>Physique</option>
+                  <option>Biologie</option>
+                  <option>Communication</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="niveau"
+                  >Niveau <span class="required">*</span></label
+                >
+                <select id="niveau" name="niveau" required>
+                  <option value="">Sélectionnez</option>
+                  <option>L1</option>
+                  <option>L2</option>
+                  <option>L3</option>
+                  <option>L4</option>
+                  <option>L5</option>
+                  <option>M1</option>
+                  <option>M2</option>
+                  <option>Doctorat</option>
+                </select>
+              </div>
+            </div>
+            <div class="step-nav">
+              <button type="button" class="btn-next" data-next="2">
+                Suivant →
+              </button>
+            </div>
+          </div>
+
+          <!-- ÉTAPE 2 -->
+          <div class="form-step" id="step-2">
+            <div class="form-group">
+              <label
+                >Niveau académique auto-évalué
+                <span class="required">*</span></label
+              >
+              <div class="range-group">
+                <span class="range-label-left">Faible</span>
+                <input
+                  type="range"
+                  id="score_academique"
+                  name="score_academique"
+                  min="1"
+                  max="5"
+                  value="3"
+                />
+                <span class="range-label-right">Excellent</span>
+              </div>
+              <div class="range-value-display">
+                <span id="val-score">3</span> / 5
+              </div>
+            </div>
+            <div class="form-group">
+              <label
+                >Connaissance de l'IA <span class="required">*</span></label
+              >
+              <div class="range-group">
+                <span class="range-label-left">Novice</span>
+                <input
+                  type="range"
+                  id="connaissance_ia"
+                  name="connaissance_ia"
+                  min="1"
+                  max="5"
+                  value="3"
+                />
+                <span class="range-label-right">Expert</span>
+              </div>
+              <div class="range-value-display">
+                <span id="val-connaissance">3</span> / 5
+              </div>
+            </div>
+            <div class="form-group">
+              <label
+                >Fréquence d'utilisation des outils IA
+                <span class="required">*</span></label
+              >
+              <div class="range-group">
+                <span class="range-label-left">Jamais</span>
+                <input
+                  type="range"
+                  id="frequence_usage"
+                  name="frequence_usage"
+                  min="1"
+                  max="5"
+                  value="3"
+                />
+                <span class="range-label-right">Quotidien</span>
+              </div>
+              <div class="range-value-display">
+                <span id="val-frequence">3</span> / 5
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Outils IA utilisés <span class="required">*</span></label>
+              <div class="checkbox-grid">
+                <label class="checkbox-item"
+                  ><input type="checkbox" name="outils" value="ChatGPT" /><span
+                    class="checkbox-custom"
+                  ></span
+                  >ChatGPT</label
+                >
+                <label class="checkbox-item"
+                  ><input type="checkbox" name="outils" value="Copilot" /><span
+                    class="checkbox-custom"
+                  ></span
+                  >Copilot</label
+                >
+                <label class="checkbox-item"
+                  ><input type="checkbox" name="outils" value="DeepSeek" /><span
+                    class="checkbox-custom"
+                  ></span
+                  >DeepSeek</label
+                >
+                <label class="checkbox-item"
+                  ><input type="checkbox" name="outils" value="Gemini" /><span
+                    class="checkbox-custom"
+                  ></span
+                  >Gemini</label
+                >
+                <label class="checkbox-item"
+                  ><input type="checkbox" name="outils" value="Grok" /><span
+                    class="checkbox-custom"
+                  ></span
+                  >Grok</label
+                >
+              </div>
+              <input
+                type="text"
+                id="autres_outils"
+                name="autres_outils"
+                placeholder="Autres (précisez)..."
+                class="mt-8"
+              />
+            </div>
+            <div class="step-nav">
+              <button type="button" class="btn-prev" data-prev="1">
+                ← Retour
+              </button>
+              <button type="button" class="btn-next" data-next="3">
+                Suivant →
+              </button>
+            </div>
+          </div>
+
+          <!-- ÉTAPE 3 -->
+          <div class="form-step" id="step-3">
+            <div class="form-group">
+              <label for="contexte"
+                >Contexte principal d'utilisation
+                <span class="required">*</span></label
+              >
+              <select id="contexte" name="contexte" required>
+                <option value="">Sélectionnez</option>
+                <option>Recherches documentaires</option>
+                <option>Résumé de cours</option>
+                <option>Résolution d'exercices</option>
+                <option>Rédaction de rapports</option>
+                <option>Programmation</option>
+                <option>Traduction</option>
+                <option>Autre</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Autonomie sans IA <span class="required">*</span></label>
+              <div class="range-group">
+                <span class="range-label-left">Pas du tout</span>
+                <input
+                  type="range"
+                  id="autonomie"
+                  name="autonomie"
+                  min="1"
+                  max="5"
+                  value="3"
+                />
+                <span class="range-label-right">Totalement</span>
+              </div>
+              <div class="range-value-display">
+                <span id="val-autonomie">3</span> / 5
+              </div>
+            </div>
+            <div class="form-group">
+              <label
+                >Impact perçu de l'IA sur tes notes
+                <span class="required">*</span></label
+              >
+              <div class="impact-buttons" id="impact-buttons">
+                <button type="button" class="impact-btn" data-value="-2">
+                  😟 Très négatif
+                </button>
+                <button type="button" class="impact-btn" data-value="-1">
+                  🙁 Négatif
+                </button>
+                <button type="button" class="impact-btn" data-value="0">
+                  😐 Neutre
+                </button>
+                <button type="button" class="impact-btn" data-value="1">
+                  🙂 Positif
+                </button>
+                <button type="button" class="impact-btn" data-value="2">
+                  😄 Très positif
+                </button>
+              </div>
+              <input
+                type="hidden"
+                id="impact_notes"
+                name="impact_notes"
+                value=""
+              />
+            </div>
+            <div class="form-group">
+              <label for="remarque"
+                >Remarque libre <span class="optional">(optionnel)</span></label
+              >
+              <textarea
+                id="remarque"
+                name="remarque"
+                placeholder="Partagez votre avis..."
+                rows="3"
+              ></textarea>
+            </div>
+            <div class="step-nav">
+              <button type="button" class="btn-prev" data-prev="2">
+                ← Retour
+              </button>
+              <button type="submit" class="btn-submit">
+                <span>Valider ma réponse</span>
+                <span class="submit-icon">✓</span>
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <div class="success-screen hidden" id="success-screen">
+          <div class="success-icon">✓</div>
+          <h3>Merci pour votre participation !</h3>
+          <p>Votre réponse a été enregistrée en base de données.</p>
+          <div class="success-btns">
+            <button class="btn-primary" id="btn-see-results">
+              Voir les résultats
+            </button>
+            <button class="btn-secondary" id="btn-new-response">
+              Nouvelle réponse
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+  </body>
+</html>
