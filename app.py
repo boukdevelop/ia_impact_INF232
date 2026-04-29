@@ -13,6 +13,7 @@ Routes :
 
 from flask import Flask, jsonify, request, render_template, abort
 from flask_cors import CORS
+import threading, time, requests, os
 import database as db
 
 # ── INITIALISATION ─────────────────────────────────────────────
@@ -163,6 +164,25 @@ def method_not_allowed(e):
 def internal_error(e):
     return jsonify({"success": False, "error": "Erreur interne du serveur"}), 500
 
+# ── PING AUTOMATIQUEMENT ─────────────────────────────────────────────
+
+def keep_alive():
+    """Thread qui ping l'app elle-même toutes les 10 minutes."""
+    # On attend 30s au démarrage que le serveur soit prêt
+    time.sleep(30)
+    url = os.environ.get("APP_URL", "")  # ex: https://iacam.onrender.com
+    if not url:
+        return  # Ne ping rien en local
+    while True:
+        try:
+            requests.get(f"{url}/api/stats", timeout=10)
+            print("🔁 Keep-alive ping OK")
+        except Exception as e:
+            print(f"⚠️ Keep-alive raté : {e}")
+        time.sleep(600)  # 10 minutes
+
+# Démarre le thread en arrière-plan (daemon=True → s'arrête avec Flask)
+threading.Thread(target=keep_alive, daemon=True).start()
 
 # ── POINT D'ENTRÉE ─────────────────────────────────────────────
 if __name__ == "__main__":
